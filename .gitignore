@@ -1,0 +1,15 @@
+bin/
+bin/Debug
+obj/
+obj/Debug/
+
+.vs/
+.vscode/
+
+Josmar.session.sql
+
+*.exe
+*.dll
+*.pdb
+
+appsettings.Development.json
