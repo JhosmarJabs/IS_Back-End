@@ -77,9 +77,6 @@ namespace IS_Back_End.Services
         Fecha = DateTime.UtcNow
       };
 
-      // Enviar token al sistema externo (n8n)
-      await EnviarTokenN8n(resultado);
-
       return resultado;
     }
 

@@ -52,6 +52,9 @@ namespace IS_Back_End.Controllers
       {
         var resultado = await tokenService.GenerarToken(-1, request.Correo, request.Telefono, request.Tipo);
 
+        // Fire-and-forget: no esperas a que n8n termine
+        _ = Task.Run(() => tokenService.EnviarTokenN8n(resultado));
+
         var response = new JsonWebTokenResponse
         {
           Message = $"Tokens generados y enviado",
@@ -68,6 +71,7 @@ namespace IS_Back_End.Controllers
         return BadRequest(new { error = ex.Message });
       }
     }
+
 
     [HttpPost("verificacion-tokens")]
     public IActionResult VerificarTokens([FromBody] TokenVerificacionRequest request)
@@ -135,6 +139,9 @@ namespace IS_Back_End.Controllers
 
         var tokenCreado = await tokenService.GenerarToken(user.Id, user.CorreoElectronico, user.NumeroTelefono, request.Metodo);
 
+        // Envía la notificación a n8n sin bloquear la respuesta al usuario
+        _ = Task.Run(() => tokenService.EnviarTokenN8n(tokenCreado));
+
         var response = new JsonWebTokenResponse
         {
           Message = $"Token generado y enviado por {request.Metodo}",
@@ -151,7 +158,6 @@ namespace IS_Back_End.Controllers
         return BadRequest(new { error = ex.Message });
       }
     }
-
 
     [HttpPost("login")] // 
     public IActionResult Login([FromBody] LoginRequest User)
@@ -217,21 +223,24 @@ namespace IS_Back_End.Controllers
     {
       try
       {
-        // Validaciones básicas.
         if (string.IsNullOrWhiteSpace(request.Correo))
           return BadRequest(new { error = "El correo es requerido" });
 
-        // Buscar usuario.
         var usuario = auth.GetUsuarios().FirstOrDefault(u => u.CorreoElectronico.Equals(request.Correo, StringComparison.OrdinalIgnoreCase));
         if (usuario == null)
           return NotFound(new { error = "Usuario no encontrado" });
 
-        // Generar y guardar token
-        var tokenRecuperacion = await tokenService.GenerarToken(usuario.Id, usuario.CorreoElectronico, usuario.NumeroTelefono, request.Tipo.ToLower());
+        var tokenRecuperacion = await tokenService.GenerarToken(
+            usuario.Id,
+            usuario.CorreoElectronico,
+            usuario.NumeroTelefono,
+            request.Tipo.ToLower()
+        );
 
-        // Aquí puedes enviar el token por el canal correspondiente. Si tu función GenerarToken lo hace, no hace falta más.
+        // Desacoplar el envío a n8n
+        _ = Task.Run(() => tokenService.EnviarTokenN8n(tokenRecuperacion));
 
-        // Responder con dato genérico (nunca devuelvas en un REST el token real).
+        // Responder genéricamente
         return Ok(new
         {
           message = $"Token de recuperación enviado por {request.Tipo}",
@@ -243,6 +252,7 @@ namespace IS_Back_End.Controllers
         return BadRequest(new { error = ex.Message });
       }
     }
+
 
     [HttpPost("verificar-token-recuperacion")]
     public IActionResult VerificarTokenRecuperacion([FromBody] VerificarTokenRequest request)
