@@ -1,6 +1,0 @@
-@MiWebService_HostAddress = http://localhost:5075
-
-GET {{MiWebService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
