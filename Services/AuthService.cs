@@ -145,22 +145,40 @@ namespace IS_Back_End.Services
     }
 
 
-    public ValidacionTokenResult ProcesarLoginConBiometrico(string correo, string dataBiometrica)
+    public ValidacionTokenResult ProcesarLoginConBiometrico(string correo, double[] dataBiometrica)
     {
-      if (string.IsNullOrEmpty(dataBiometrica))
-        return new ValidacionTokenResult { EntradaValida = false, Mensaje = "Los datos biométricos son requeridos" };
+      // Validación inicial del array recibido
+      if (dataBiometrica == null || dataBiometrica.Length != 128)
+        return new ValidacionTokenResult { EntradaValida = false, Mensaje = "Los datos biométricos deben ser un array de 128 valores" };
 
+      // Carga la lista de usuarios desde personas.json
       var personas = data.Load<Persona>("personas.json");
       var user = personas.FirstOrDefault(x => x.CorreoElectronico == correo);
 
       if (user == null)
         return new ValidacionTokenResult { EntradaValida = false, Mensaje = "Usuario no encontrado" };
 
-      // Aquí implementar tu lógica biométrica
+      if (user.FaceID == null || user.FaceID.Length != 128)
+        return new ValidacionTokenResult { EntradaValida = false, Mensaje = "El usuario no tiene datos biométricos válidos" };
+
+      // Calcula la distancia euclidiana entre los dos vectores
+      double distancia = Math.Sqrt(user.FaceID.Zip(dataBiometrica, (a, b) => Math.Pow(a - b, 2)).Sum());
+
+      // Verifica el umbral de coincidencia
+      if (distancia > 0.6)
+        return new ValidacionTokenResult { EntradaValida = false, Mensaje = "Biométrico incorrecto" };
 
       var jwt = jwtService.GenerarToken(user.Id);
-      return new ValidacionTokenResult { EntradaValida = true, Mensaje = "Login exitoso con biometría", Jwt = jwt };
+
+      return new ValidacionTokenResult
+      {
+        EntradaValida = true,
+        Mensaje = $"Login exitoso con biometría. Bienvenido {user.Nombre}.",
+        Jwt = jwt
+      };
     }
+
+
 
     // 🔹 Verificar token de recuperación de contraseña
 

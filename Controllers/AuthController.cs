@@ -18,8 +18,8 @@ namespace IS_Back_End.Controllers
       tokenService = t;
     }
 
-    [HttpPost("")] // Funcionando
-    public IActionResult Prueba()
+    [HttpPost("")]
+    public IActionResult TestEndpoint()
     {
       try
       {
@@ -30,22 +30,7 @@ namespace IS_Back_End.Controllers
       { return BadRequest(new { error = ex.Message }); }
     }
 
-    [HttpPost("registro")] // Funcionando
-    public IActionResult Registrar([FromBody] Persona p)
-    {
-      try
-      {
-        if (p == null)
-          return BadRequest(new { error = "Se requiere un JSON válido en el body" });
-
-        var user = auth.RegistrarUsuario(p);
-        return Ok(new { message = "Usuario registrado", user });
-      }
-      catch (System.Exception ex)
-      { return BadRequest(new { error = ex.Message }); }
-    }
-
-    [HttpPost("generar-validacion")]
+    [HttpPost("GenerateVerificationToken")]
     public async Task<IActionResult> GenerarTokenVerificacion([FromBody] TokenVerificacionRequest request)
     {
       try
@@ -72,43 +57,33 @@ namespace IS_Back_End.Controllers
       }
     }
 
-
-    [HttpPost("verificacion-tokens")]
-    public IActionResult VerificarTokens([FromBody] TokenVerificacionRequest request)
+    [HttpPost("RegisterUser")]
+    public IActionResult Registrar([FromBody] Persona p)
     {
+      // public int Id { get; set; }
+      // public string Nombre { get; set; }
+      // public string ApellidoPaterno { get; set; }
+      // public string ApellidoMaterno { get; set; }
+      // public string CorreoElectronico { get; set; }
+      // public string NumeroTelefono { get; set; }
+      // public string Sexo { get; set; }
+      // public string FechaNacimiento { get; set; }
+      // public string? HuellaDactilar { get; set; }
+      // public string? FaceID { get; set; }
+      // public string PasswordHash { get; set; }
       try
       {
-        bool esValido = false;
+        if (p == null)
+          return BadRequest(new { error = "Se requiere un JSON válido en el body" });
 
-        switch (request.Tipo?.ToLower())
-        {
-          case "correo":
-            esValido = tokenService.VerificarTokens(request.Correo, null);
-            break;
-          case "telefono":
-          case "whatsapp":
-            esValido = tokenService.VerificarTokens(null, request.Telefono);
-            break;
-          case "verificacion":
-            esValido = tokenService.VerificarTokens(request.Correo, request.Telefono);
-            break;
-          default:
-            return BadRequest(new { error = "Tipo de token no válido" });
-        }
-
-        if (!esValido)
-          return BadRequest(new { error = "Token(s) inválido(s)" });
-
-        return Ok(new { message = "Token(s) válido(s)" });
+        var user = auth.RegistrarUsuario(p);
+        return Ok(new { message = "Usuario registrado", user });
       }
-      catch (Exception ex)
-      {
-        return BadRequest(new { error = ex.Message });
-      }
+      catch (System.Exception ex)
+      { return BadRequest(new { error = ex.Message }); }
     }
 
-
-    [HttpPost("verificar-correo")] // Funcionando
+    [HttpPost("CheckEmailExists")]
     public IActionResult VerificarCorreo([FromBody] string correo)
     {
       try
@@ -126,9 +101,12 @@ namespace IS_Back_End.Controllers
       catch (Exception ex)
       { return StatusCode(500, new { error = ex.Message }); }
     }
-    [HttpPost("metodo-sesion")]
+    [HttpPost("GenerateSessionToken")]
     public async Task<IActionResult> MetodoSesion([FromBody] SesionRequest request)
     {
+      // Modelo de request:
+      // public int UsuarioId { get; set; }
+      // public string Metodo { get; set; }  // "sms", "correo", "whatsapp"
       try
       {
         var personas = auth.GetUsuarios();
@@ -159,9 +137,15 @@ namespace IS_Back_End.Controllers
       }
     }
 
-    [HttpPost("login")] // 
+    [HttpPost("Login")]
     public IActionResult Login([FromBody] LoginRequest User)
     {
+      // public string Correo { get; set; }             // siempre requerido
+      // public string TipoAuth { get; set; }            // password, token, huella, faceid
+      //    public string? Password { get; set; }          // para password
+      //    public string? TypeToken { get; set; }         // Para el tipo de token SMS, WhatsApp, Correo
+      //          public string? Token { get; set; }             // para token
+      //    public string? DataBiometrica { get; set; }    // para huella o faceID
       try
       {
         string correo = User.Correo;
@@ -178,7 +162,7 @@ namespace IS_Back_End.Controllers
         {
           "password" => LoginConPassword(usuario.CorreoElectronico, User.Password!),
           "token" => LoginConToken(User),
-          "biometrico" => LoginConBiometrico(User.Correo, User.DataBiometrica!),
+          "biometrico" => LoginConBiometrico(User),
           _ => BadRequest(new { error = "Tipo de autenticación no válido" })
         };
       }
@@ -197,6 +181,12 @@ namespace IS_Back_End.Controllers
 
     private IActionResult LoginConToken(LoginRequest user)
     {
+      // public string Correo { get; set; }             // siempre requerido
+      // public string TipoAuth { get; set; }            // password, token, huella, faceid
+      // public string? Password { get; set; }          // para password
+      // public string? TypeToken { get; set; }         // Para el tipo de token SMS, WhatsApp, Correo
+      // public string? Token { get; set; }             // para token
+      // public string? DataBiometrica { get; set; }    // para huella o faceID
       if (string.IsNullOrEmpty(user.Token))
         return BadRequest(new { error = "El token es requerido" });
 
@@ -207,20 +197,29 @@ namespace IS_Back_End.Controllers
       return Ok(new { message = resultado.Mensaje, token = resultado.Jwt, tipoAuth = "token" });
     }
 
-    private IActionResult LoginConBiometrico(string correo, string dataBiometrica)
+    public IActionResult LoginConBiometrico([FromBody] LoginRequest user)
     {
-      // var resultado = auth.ProcesarLoginConBiometrico(correo, dataBiometrica);
-      // if (!resultado.EntradaValida)
-      //   return BadRequest(new { error = resultado.Mensaje });
+      try
+      {
+        // Aquí accedes correctamente a model.DataBiometrica
+        var resultado = auth.ProcesarLoginConBiometrico(user.Correo, user.FaceID);
+        if (!resultado.EntradaValida)
+          return BadRequest(new { error = resultado.Mensaje });
 
-      // return Ok(new { message = resultado.Mensaje, token = resultado.Jwt, tipoAuth = "biometrico" });
-      return Ok(new { error = "Autenticación biométrica no implementada aún" });
+        return Ok(new { message = resultado.Mensaje, token = resultado.Jwt, tipoAuth = "biometrico" });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, new { error = ex.Message });
+      }
     }
-
     // Generar token de recuperación de contraseña
-    [HttpPost("solicitar-recuperacion")]
+    [HttpPost("RequestPasswordRecovery")]
     public async Task<IActionResult> SolicitarRecuperacion([FromBody] SolicitarRecuperacionRequest request)
     {
+      // Modelo de request:
+      // public string Correo { get; set; }
+      // public string Tipo { get; set; } // "correo", "telefono", "whatsapp"
       try
       {
         if (string.IsNullOrWhiteSpace(request.Correo))
@@ -253,10 +252,12 @@ namespace IS_Back_End.Controllers
       }
     }
 
-
-    [HttpPost("verificar-token-recuperacion")]
+    [HttpPost("VerifyRecoveryToken")]
     public IActionResult VerificarTokenRecuperacion([FromBody] VerificarTokenRequest request)
     {
+      // Modelo de request:
+      // public string Correo { get; set; }
+      // public string Token { get; set; }
       try
       {
         bool esValido = auth.VerificarTokenRecuperacion(request.Correo, request.Token);
@@ -273,7 +274,7 @@ namespace IS_Back_End.Controllers
     }
 
     // Cambiar contraseña con token de recuperación
-    [HttpPost("recuperar-password")]
+    [HttpPost("RecoverPassword")]
     public IActionResult RecuperarPassword([FromBody] RecuperarPasswordRequest request)
     {
       try
@@ -294,6 +295,39 @@ namespace IS_Back_End.Controllers
       }
     }
 
+    [HttpPost("VerifyTokens")]
+    public IActionResult VerificarTokens([FromBody] TokenVerificacionRequest request)
+    {
+      try
+      {
+        bool esValido = false;
+
+        switch (request.Tipo?.ToLower())
+        {
+          case "correo":
+            esValido = tokenService.VerificarTokens(request.Correo, null);
+            break;
+          case "telefono":
+          case "whatsapp":
+            esValido = tokenService.VerificarTokens(null, request.Telefono);
+            break;
+          case "verificacion":
+            esValido = tokenService.VerificarTokens(request.Correo, request.Telefono);
+            break;
+          default:
+            return BadRequest(new { error = "Tipo de token no válido" });
+        }
+
+        if (!esValido)
+          return BadRequest(new { error = "Token(s) inválido(s)" });
+
+        return Ok(new { message = "Token(s) válido(s)" });
+      }
+      catch (Exception ex)
+      {
+        return BadRequest(new { error = ex.Message });
+      }
+    }
   }
 }
 

@@ -7,8 +7,7 @@ namespace IS_Back_End.Models
     public string? Password { get; set; }          // para password
     public string? TypeToken { get; set; }         // Para el tipo de token SMS, WhatsApp, Correo
     public string? Token { get; set; }             // para token
-    public string? DataBiometrica { get; set; }    // para huella o faceID
+    public double[]? FaceID { get; set; }
+
   }
-
-
 }
