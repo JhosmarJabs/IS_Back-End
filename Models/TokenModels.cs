@@ -60,5 +60,43 @@
     public string Correo { get; set; }
     public string Token { get; set; }
   }
+  public class Persona
+  {
+    public int Id { get; set; }
+    public string Nombre { get; set; }
+    public string ApellidoPaterno { get; set; }
+    public string ApellidoMaterno { get; set; }
+    public string CorreoElectronico { get; set; }
+    public string NumeroTelefono { get; set; }
+    public string Sexo { get; set; }
+    public string FechaNacimiento { get; set; }
+    public string? HuellaDactilar { get; set; }
+    public double[]? FaceID { get; set; }
+
+    public string PasswordHash { get; set; }
+  }
+  public class Sesion
+  {
+    public int Id { get; set; }
+    public int PersonaId { get; set; }
+    public string TokenJwt { get; set; }
+    public DateTime FechaExpiracion { get; set; }
+    public bool Activo { get; set; }
+  }
+  public class SesionRequest
+  {
+    public int UsuarioId { get; set; }
+    public string Metodo { get; set; }  // "sms", "correo", "whatsapp"
+  }
+  public class LoginRequest
+  {
+    public string Correo { get; set; }             // siempre requerido
+    public string TipoAuth { get; set; }            // password, token, huella, faceid
+    public string? Password { get; set; }          // para password
+    public string? TypeToken { get; set; }         // Para el tipo de token SMS, WhatsApp, Correo
+    public string? Token { get; set; }             // para token
+    public double[]? FaceID { get; set; }
+
+  }
 }
 

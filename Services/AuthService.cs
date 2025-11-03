@@ -19,6 +19,7 @@ namespace IS_Back_End.Services
       jwtService = js;
     }
     public List<Persona> GetUsuarios()
+    
     {
       return data.Load<Persona>("personas.json");
     }
@@ -49,20 +50,6 @@ namespace IS_Back_End.Services
       return ePersona;
     }
 
-    // 🔹 Iniciar sesión
-    // arreglar
-    public string IniciarSesionConContraseña(string correo, string password)
-    {
-      var personas = data.Load<Persona>("personas.json");
-      var user = personas.FirstOrDefault(x => x.CorreoElectronico == correo);
-      if (user == null)
-        throw new Exception("Usuario no encontrado.");
-
-      if (!PasswordHasher.Verify(password, user.PasswordHash))
-        throw new Exception("Contraseña incorrecta.");
-
-      return jwtService.GenerarToken(user.Id);
-    }
     public ValidacionTokenResult ProcesarLoginConPassword(string correo, string password)
     {
       if (string.IsNullOrEmpty(password))
@@ -78,7 +65,7 @@ namespace IS_Back_End.Services
         return new ValidacionTokenResult { EntradaValida = false, Mensaje = "Contraseña incorrecta" };
 
       var jwt = jwtService.GenerarToken(user.Id);
-      return new ValidacionTokenResult { EntradaValida = true, Mensaje = "Login exitoso", Jwt = jwt };
+      return new ValidacionTokenResult { EntradaValida = true, Mensaje = "Login exitoso", Jwt = jwt,  };
     }
 
     public ValidacionTokenResult IniciarSesionConToken(LoginRequest eUsuario)
@@ -144,7 +131,6 @@ namespace IS_Back_End.Services
       return tokenEncontrado != null;
     }
 
-
     public ValidacionTokenResult ProcesarLoginConBiometrico(string correo, double[] dataBiometrica)
     {
       // Validación inicial del array recibido
@@ -178,12 +164,6 @@ namespace IS_Back_End.Services
       };
     }
 
-
-
-    // 🔹 Verificar token de recuperación de contraseña
-
-
-    // 🔹 Cambiar contraseña del usuario
     public bool CambiarPassword(string correo, string nuevaPassword)
     {
       if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(nuevaPassword))

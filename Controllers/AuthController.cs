@@ -96,11 +96,12 @@ namespace IS_Back_End.Controllers
         if (!existe)
           return NotFound(new { error = "El correo no está registrado" });
 
-        return Ok(new { message = "Correo encontrado", correo = correo });
+        return Ok(new { message = "Correo encontrado", correo });
       }
       catch (Exception ex)
       { return StatusCode(500, new { error = ex.Message }); }
     }
+    
     [HttpPost("GenerateSessionToken")]
     public async Task<IActionResult> MetodoSesion([FromBody] SesionRequest request)
     {
