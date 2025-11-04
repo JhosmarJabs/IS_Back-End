@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "TokenId": "3c9a8577-6357-4778-99b0-f5d15204988d",
+    "UsuarioId": 1,
+    "Tipo": "whatsapp",
+    "Valor": "236383",
+    "Valor2": null,
+    "FechaGeneracion": "2025-11-04T17:51:48.7462945Z",
+    "FechaExpiracion": "2025-11-04T18:06:48.7463306Z",
+    "Usado": false
+  },
+  {
+    "TokenId": "aea17255-8b53-4290-ab25-657ef563809e",
+    "UsuarioId": 1,
+    "Tipo": "whatsapp",
+    "Valor": "573030",
+    "Valor2": null,
+    "FechaGeneracion": "2025-11-04T17:52:03.3569115Z",
+    "FechaExpiracion": "2025-11-04T18:07:03.3569118Z",
+    "Usado": false
+  }
+]
