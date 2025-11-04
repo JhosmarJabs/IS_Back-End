@@ -73,6 +73,7 @@ namespace IS_Back_End.Services
       // Construir objeto resultado
       var resultado = new TokenResult
       {
+        Id = usuarioId,
         Tipo = tipo,
         Correo = correo,
         Telefono = telefono,

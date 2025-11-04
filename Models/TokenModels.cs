@@ -3,6 +3,7 @@
 
   public class TokenResult
   {
+    public int Id { get; set; }
     public string Tipo { get; set; }           // "correo", "telefono", "whatsapp", "verificacion"
     public string Correo { get; set; }
     public string Telefono { get; set; }

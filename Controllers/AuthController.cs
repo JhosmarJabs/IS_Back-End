@@ -47,7 +47,7 @@ namespace IS_Back_End.Controllers
           TokenCorreo = resultado.TokenCorreo,
           TokenTelefono = resultado.TokenTelefono,
           Tipo = resultado.Tipo,
-          Id = -1
+          Id = resultado.Id
         };
 
         return Ok(response);
