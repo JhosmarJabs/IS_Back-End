@@ -31,6 +31,28 @@ namespace IS_Back_End.Services
       return personas.Any(p =>
           p.CorreoElectronico.Equals(correo, StringComparison.OrdinalIgnoreCase));
     }
+    
+    public (bool existe, Persona? usuario, string? error) ObtenerUsuarioPorCorreo(string correo)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(correo))
+                return (false, null, "El correo es requerido");
+
+            var personas = data.Load<Persona>("personas.json");
+            var usuario = personas.FirstOrDefault(p => 
+                p.CorreoElectronico.Equals(correo, StringComparison.OrdinalIgnoreCase));
+
+            if (usuario == null)
+                return (false, null, "El correo no está registrado");
+
+            return (true, usuario, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, null, $"Error interno: {ex.Message}");
+        }
+    }
 
     // 🔹 Registrar nuevo usuario
     public Persona RegistrarUsuario(Persona ePersona)

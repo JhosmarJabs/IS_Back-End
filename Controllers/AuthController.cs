@@ -86,22 +86,32 @@ namespace IS_Back_End.Controllers
     [HttpPost("CheckEmailExists")]
     public IActionResult VerificarCorreo([FromBody] string correo)
     {
-      try
+      var (existe, usuario, error) = auth.ObtenerUsuarioPorCorreo(correo);
+
+      if (!existe)
       {
-        if (string.IsNullOrWhiteSpace(correo))
-          return BadRequest(new { error = "El correo es requerido" });
-
-        bool existe = auth.VerificarCorreoExiste(correo);
-
-        if (!existe)
-          return NotFound(new { error = "El correo no está registrado" });
-
-        return Ok(new { message = "Correo encontrado", correo });
+        if (error.Contains("requerido"))
+          return BadRequest(new { error });
+        if (error.Contains("no está registrado"))
+          return NotFound(new { error });
+        return StatusCode(500, new { error });
       }
-      catch (Exception ex)
-      { return StatusCode(500, new { error = ex.Message }); }
+
+      return Ok(new
+      {
+        message = "Correo encontrado",
+        usuario = new
+        {
+          usuario.Nombre,
+          usuario.CorreoElectronico,
+          usuario.NumeroTelefono,
+          usuario.ApellidoPaterno,
+          usuario.ApellidoMaterno,
+          usuario.Sexo
+        }
+      });
     }
-    
+
     [HttpPost("GenerateSessionToken")]
     public async Task<IActionResult> MetodoSesion([FromBody] SesionRequest request)
     {
