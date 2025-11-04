@@ -1,3 +1,12 @@
 [
-
+  {
+    "TokenId": "3d1f2bc2-5989-4ead-a370-5540d41cbc72",
+    "UsuarioId": -1,
+    "Tipo": "whatsapp",
+    "Valor": "374626",
+    "Valor2": null,
+    "FechaGeneracion": "2025-11-04T14:36:26.3412962Z",
+    "FechaExpiracion": "2025-11-04T14:51:26.3414491Z",
+    "Usado": false
+  }
 ]

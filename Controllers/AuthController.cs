@@ -102,6 +102,7 @@ namespace IS_Back_End.Controllers
         message = "Correo encontrado",
         usuario = new
         {
+          usuario.Id,
           usuario.Nombre,
           usuario.CorreoElectronico,
           usuario.NumeroTelefono,
@@ -111,7 +112,7 @@ namespace IS_Back_End.Controllers
         }
       });
     }
-
+    
     [HttpPost("GenerateSessionToken")]
     public async Task<IActionResult> MetodoSesion([FromBody] SesionRequest request)
     {
