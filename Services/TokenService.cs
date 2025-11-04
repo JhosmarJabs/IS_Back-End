@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Backend.Services;
 using IS_Back_End;
 using IS_Back_End.Models;
 
@@ -22,6 +23,9 @@ namespace IS_Back_End.Services
     // Función central para generacion de uno o dos tokens según el tipo
     public async Task<TokenResult> GenerarToken(int usuarioId, string correo, string telefono, string tipo)
     {
+      if (usuarioId <= 0)
+        usuarioId = -1;
+
       var random = new Random();
 
       string tokenCorreo = null;

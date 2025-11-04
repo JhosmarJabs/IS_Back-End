@@ -117,7 +117,6 @@ namespace IS_Back_End.Services
           !t.Usado &&
           t.FechaExpiracion > DateTime.UtcNow);
 
-
       if (tokenEncontrado == null)
         return new ValidacionTokenResult { EntradaValida = false, Mensaje = $"Token {eUsuario.TypeToken} inválido o expirado." };
 

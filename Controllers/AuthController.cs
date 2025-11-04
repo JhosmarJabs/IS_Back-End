@@ -37,9 +37,8 @@ namespace IS_Back_End.Controllers
     {
       try
       {
-        var resultado = await tokenService.GenerarToken(-1, request.Correo, request.Telefono, request.Tipo);
+        var resultado = await tokenService.GenerarToken(request.Id, request.Correo, request.Telefono, request.Tipo);
 
-        // Fire-and-forget: no esperas a que n8n termine
         _ = Task.Run(() => tokenService.EnviarTokenN8n(resultado));
 
         var response = new JsonWebTokenResponse

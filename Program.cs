@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace IS_Back_End
 {
@@ -14,7 +15,11 @@ namespace IS_Back_End
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    // Obtiene el puerto de la variable de entorno (o usa 8080 si no existe)
+                    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+                    webBuilder
+                        .UseStartup<Startup>()
+                        .UseUrls($"http://*:{port}");
                 });
     }
 }
