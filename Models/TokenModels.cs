@@ -98,5 +98,11 @@
     public double[]? FaceID { get; set; }
 
   }
+
+  public class Admin
+  {
+    public string Usuario { get; set; }
+    public string Contraseña { get; set; }
+  }
 }
 

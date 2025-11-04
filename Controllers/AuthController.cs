@@ -2,6 +2,8 @@
 using IS_Back_End.Models;
 using IS_Back_End.Services;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Text.Json;
+using Backend.Services;
 
 namespace IS_Back_End.Controllers
 {
@@ -112,7 +114,7 @@ namespace IS_Back_End.Controllers
         }
       });
     }
-    
+
     [HttpPost("GenerateSessionToken")]
     public async Task<IActionResult> MetodoSesion([FromBody] SesionRequest request)
     {
@@ -340,6 +342,67 @@ namespace IS_Back_End.Controllers
         return BadRequest(new { error = ex.Message });
       }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // === LEER PERSONAS.JSON ===
+    [HttpPost("debug/read-personas")]
+    public IActionResult ReadPersonas([FromBody] Admin admin)
+    {
+      if (!auth.EsRootAdmin(admin.Usuario, admin.Contraseña))
+        return StatusCode(-1014, new { error = "No tienes permisos para ejecutar esto" });
+
+      var (success, contenido, error) = auth.LeerPersonasJson();
+
+      if (!success)
+        return StatusCode(500, new { error = "Error al leer personas.json", detalle = error });
+
+      return Ok(new { archivo = "personas.json", contenido });
+    }
+
+    // === LEER TOKENS_TEMPORALES.JSON ===
+    [HttpPost("debug/read-tokens")]
+    public IActionResult ReadTokens([FromBody] Admin admin)
+    {
+      if (!auth.EsRootAdmin(admin.Usuario, admin.Contraseña))
+        return StatusCode(-1014, new { error = "No tienes permisos para ejecutar esto" });
+
+      var (success, contenido, error) = auth.LeerTokensJson();
+
+      if (!success)
+        return StatusCode(500, new { error = "Error al leer tokens_temporales.json", detalle = error });
+
+      return Ok(new { archivo = "tokens_temporales.json", contenido });
+    }
+
+    // === LIMPIAR TOKENS_TEMPORALES.JSON ===
+    [HttpPost("debug/clean-tokens")]
+    public IActionResult CleanTokens([FromBody] Admin admin)
+    {
+      if (!auth.EsRootAdmin(admin.Usuario, admin.Contraseña))
+        return StatusCode(-1014, new { error = "No tienes permisos para ejecutar esto" });
+
+      var (success, error) = auth.LimpiarTokens();
+
+      if (!success)
+        return StatusCode(500, new { error = "Error al limpiar tokens_temporales.json", detalle = error });
+
+      return Ok(new { message = "tokens_temporales.json limpiado", contenido = "[]" });
+    }
+
+
   }
 }
 

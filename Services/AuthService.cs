@@ -1,8 +1,9 @@
-using Backend.Services;
 using IS_Back_End.Helpers;
 using IS_Back_End.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace IS_Back_End.Services
 {
@@ -19,7 +20,6 @@ namespace IS_Back_End.Services
       jwtService = js;
     }
     public List<Persona> GetUsuarios()
-    
     {
       return data.Load<Persona>("personas.json");
     }
@@ -31,27 +31,27 @@ namespace IS_Back_End.Services
       return personas.Any(p =>
           p.CorreoElectronico.Equals(correo, StringComparison.OrdinalIgnoreCase));
     }
-    
+
     public (bool existe, Persona? usuario, string? error) ObtenerUsuarioPorCorreo(string correo)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(correo))
-                return (false, null, "El correo es requerido");
+      try
+      {
+        if (string.IsNullOrWhiteSpace(correo))
+          return (false, null, "El correo es requerido");
 
-            var personas = data.Load<Persona>("personas.json");
-            var usuario = personas.FirstOrDefault(p => 
-                p.CorreoElectronico.Equals(correo, StringComparison.OrdinalIgnoreCase));
+        var personas = data.Load<Persona>("personas.json");
+        var usuario = personas.FirstOrDefault(p =>
+            p.CorreoElectronico.Equals(correo, StringComparison.OrdinalIgnoreCase));
 
-            if (usuario == null)
-                return (false, null, "El correo no está registrado");
+        if (usuario == null)
+          return (false, null, "El correo no está registrado");
 
-            return (true, usuario, null);
-        }
-        catch (Exception ex)
-        {
-            return (false, null, $"Error interno: {ex.Message}");
-        }
+        return (true, usuario, null);
+      }
+      catch (Exception ex)
+      {
+        return (false, null, $"Error interno: {ex.Message}");
+      }
     }
 
     // 🔹 Registrar nuevo usuario
@@ -87,7 +87,7 @@ namespace IS_Back_End.Services
         return new ValidacionTokenResult { EntradaValida = false, Mensaje = "Contraseña incorrecta" };
 
       var jwt = jwtService.GenerarToken(user.Id);
-      return new ValidacionTokenResult { EntradaValida = true, Mensaje = "Login exitoso", Jwt = jwt,  };
+      return new ValidacionTokenResult { EntradaValida = true, Mensaje = "Login exitoso", Jwt = jwt, };
     }
 
     public ValidacionTokenResult IniciarSesionConToken(LoginRequest eUsuario)
@@ -219,6 +219,63 @@ namespace IS_Back_End.Services
 
       return true;
     }
+
+
+
+
+
+
+
+
+
+    // === VALIDAR ROOT / ADMIN ===
+    public bool EsRootAdmin(string usuario, string contraseña)
+    {
+      return usuario == "root" && contraseña == "admin";
+    }
+
+    // === LEER PERSONAS.JSON ===
+    public (bool success, object? contenido, string? error) LeerPersonasJson()
+    {
+      try
+      {
+        var personas = data.Load<Persona>("personas.json");
+        return (true, personas, null);
+      }
+      catch (Exception ex)
+      {
+        return (false, null, $"Error al leer personas.json: {ex.Message}");
+      }
+    }
+
+    // === LEER TOKENS_TEMPORALES.JSON ===
+    public (bool success, object? contenido, string? error) LeerTokensJson()
+    {
+      try
+      {
+        var tokens = data.Load<TokenTemporal>("tokens_temporales.json");
+        return (true, tokens, null);
+      }
+      catch (Exception ex)
+      {
+        return (false, null, $"Error al leer tokens_temporales.json: {ex.Message}");
+      }
+    }
+
+    // === LIMPIAR TOKENS_TEMPORALES.JSON ===
+    public (bool success, string? error) LimpiarTokens()
+    {
+      try
+      {
+        data.Save("tokens_temporales.json", new List<TokenTemporal>());
+        return (true, null);
+      }
+      catch (Exception ex)
+      {
+        return (false, $"Error al limpiar tokens_temporales.json: {ex.Message}");
+      }
+    }
+
 
   }
 }
